@@ -3,6 +3,7 @@ run-name: Build CentOS 7 Buildbox Assets Images
 on:
   # Only allow manual triggers
   workflow_dispatch:
+  pull_request:
 
 env:
   REGISTRY: ghcr.io
@@ -14,7 +15,7 @@ jobs:
     strategy:
       matrix:
         # Build assets on x86 and ARM64.
-        runner: [ ubuntu-22.04-32core, ['self-hosted', 'linux', 'arm64'] ]
+        runner: ['self-hosted', 'linux', 'arm64']
     # Use bigger worker. Clang takes a while to build.
     runs-on: ${{ matrix.runner }}
 
@@ -23,22 +24,4 @@ jobs:
       packages: write
 
     steps:
-      - name: Checkout Teleport
-        uses: actions/checkout@v4
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
-
-      - name: Login to registry
-        uses: docker/login-action@v2
-        with:
-          registry: ${{ env.REGISTRY }}
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      # We need to keep env vars in sync, so, we can't use standard build actions
-      - name: Build buildbox assets image
-        run: cd build.assets && make build-centos7-assets
-
-      - name: Docker push the latest built image
-        run: docker push $(docker images -a --format '{{.Repository}}:{{.Tag}}'| head -1)
+      - name: ls ~
